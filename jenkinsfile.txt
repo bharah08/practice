@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    tools{
+        maven 'maven-3.8.6'
+    }
+
+    stages {
+        stage('pulling code from github') {
+            steps {
+                git 'https://github.com/bharah08/CI-CD-using-Docker.git'
+            }
+        }
+         stage('build the code') {
+            steps {
+                bat 'mvn clean package'
+            }
+        }
+        stage('Docker Build and Tag') {
+           steps {
+              
+                bat 'docker build -t samplewebapp:latest .' 
+                bat 'docker tag samplewebapp bharath0812/first:latest'
+                //bat 'docker tag samplewebapp bharath0812/first:$BUILD_NUMBER'
+               
+          }
+        }
+   stage('Publish image to Docker Hub') {
+            steps {
+        withDockerRegistry([ credentialsId: "Docker", url: "" ]) {
+          bat  'docker push bharath0812/first:latest'
+        //  bat  'docker push bharath0812/first:$BUILD_NUMBER' 
+        }
+                  
+          }
+        }
+}
+}
